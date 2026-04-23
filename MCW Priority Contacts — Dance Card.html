@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCW Dance Card</title>
+<style>
+:root{--bg:#f5f6f8;--bg2:#fff;--bg3:#f8f9fb;--border:#e8e9ed;--border2:#f0f1f4;--text:#1a1a2e;--text2:#555;--text3:#777;--text4:#999;--text5:#aaa;--accent:#1F4E79;--accent2:#2E75B6;--owner:#1F4E79;--owner-bg:#D6E4F0;--arch:#2E7D32;--arch-bg:#E2EFDA;--con:#8B6914;--con-bg:#FFF2CC;--met:#2E7D32;--met-bg:#f0faf2;--met-bg2:#e4f5e8;--followup-bg:#FFF8E1;--followup:#B8860B;--tooltip-bg:#fff;--tooltip-shadow:rgba(0,0,0,0.12);--card-hover:#fafbfd;--section-bg:#f0f1f4;--pw-bg:rgba(31,78,121,0.97)}
+@media(prefers-color-scheme:dark){:root{--bg:#111318;--bg2:#1a1d24;--bg3:#22252e;--border:#2a2d36;--border2:#252830;--text:#e0e2e8;--text2:#a0a4b0;--text3:#888c98;--text4:#666a76;--text5:#555960;--card-hover:#22252e;--section-bg:#1e2028;--tooltip-bg:#22252e;--tooltip-shadow:rgba(0,0,0,0.4);--owner-bg:#1a2e40;--arch-bg:#1a2e1e;--con-bg:#2e2810;--met-bg:#1a2e1e;--met-bg2:#1e3520;--followup-bg:#2e2810;--pw-bg:rgba(10,20,35,0.97)}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.pw-screen{position:fixed;inset:0;background:var(--pw-bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:20px}
+.pw-screen.hidden{display:none}
+.pw-box{background:var(--bg2);border-radius:12px;padding:40px;max-width:380px;width:90%;text-align:center;border:1px solid var(--border)}
+.pw-box h2{font-size:22px;font-weight:600;color:var(--accent);margin-bottom:6px}
+.pw-box p{font-size:13px;color:var(--text3);margin-bottom:20px}
+.pw-box input{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--bg3);color:var(--text);outline:none}
+.pw-box input:focus{border-color:var(--accent2)}
+.pw-box button{width:100%;padding:12px;margin-top:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.pw-box button:hover{background:var(--accent2)}
+.pw-err{color:#e24b4a;font-size:12px;margin-top:8px;min-height:18px}
+.app.hidden{display:none}
+.header{background:linear-gradient(135deg,#1F4E79 0%,#2E75B6 100%);color:#fff;padding:40px 40px 28px}
+.header h1{font-size:26px;font-weight:600;letter-spacing:-0.5px;margin-bottom:4px}
+.header p{font-size:13px;opacity:0.7}
+.toolbar{display:flex;gap:12px;padding:16px 40px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.search-box{flex:1;min-width:200px;position:relative}
+.search-box input{width:100%;padding:10px 14px 10px 36px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg3);color:var(--text);outline:none}
+.search-box input:focus{border-color:var(--accent2)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text4);font-size:14px}
+.filter-btns{display:flex;gap:6px;flex-wrap:wrap}
+.fbtn{padding:6px 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;background:var(--bg2);color:var(--text2);transition:all 0.15s}
+.fbtn:hover{border-color:var(--accent2);color:var(--accent)}
+.fbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.fbtn[data-f="owner"].active{background:var(--owner)}
+.fbtn[data-f="architect"].active{background:var(--arch)}
+.fbtn[data-f="contractor"].active{background:var(--con)}
+.fbtn[data-f="met"].active{background:var(--met)}
+.progress-bar{padding:16px 40px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px}
+.progress-track{flex:1;height:8px;background:var(--border2);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--met),#4caf50);border-radius:4px;transition:width 0.5s ease}
+.progress-text{font-size:13px;font-weight:600;color:var(--accent);white-space:nowrap}
+.this-week{padding:16px 40px;background:var(--followup-bg);border-bottom:1px solid var(--border)}
+.this-week-title{font-size:11px;font-weight:600;color:var(--followup);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.this-week-items{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text)}
+.tw-item{display:flex;align-items:center;gap:6px}
+.tw-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.stats{display:flex;gap:12px;padding:16px 40px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.stat{background:var(--bg3);border-radius:8px;padding:10px 16px;flex:1;text-align:center;min-width:80px}
+.stat-num{font-size:22px;font-weight:600;color:var(--accent)}
+.stat-label{font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:0.5px;margin-top:1px}
+.legend{display:flex;gap:20px;padding:12px 40px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:3px}
+.section{padding:10px 40px;background:var(--section-bg);font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0;padding:0 40px;background:var(--bg2)}
+.card{position:relative;padding:18px 18px 14px;border-bottom:1px solid var(--border2);border-right:1px solid var(--border2);cursor:pointer;transition:background 0.15s;-webkit-tap-highlight-color:transparent}
+.card:hover{background:var(--card-hover)}
+.card.expanded{background:var(--card-hover)}
+.card-top{display:flex;align-items:center;gap:12px}
+.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;letter-spacing:0.5px;flex-shrink:0}
+.av-owner{background:var(--owner-bg);color:var(--owner)}
+.av-arch{background:var(--arch-bg);color:var(--arch)}
+.av-con{background:var(--con-bg);color:var(--con)}
+.card-info{min-width:0;flex:1}
+.card-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-firm{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:6px}
+.b-owner{background:var(--owner-bg);color:var(--owner)}
+.b-arch{background:var(--arch-bg);color:var(--arch)}
+.b-con{background:var(--con-bg);color:var(--con)}
+.rank{position:absolute;top:8px;right:12px;font-size:10px;font-weight:700;color:var(--text4)}
+.card.met{background:var(--met-bg);border-left:4px solid var(--met)}
+.card.met:hover,.card.met.expanded{background:var(--met-bg2)}
+.card.met .rank{color:var(--met)}
+.met-badge{display:inline-block;padding:1px 8px;border-radius:12px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;background:var(--met);color:#fff;margin-left:6px;vertical-align:middle}
+.detail{display:none;padding:14px 0 4px;border-top:1px solid var(--border2);margin-top:12px}
+.card.expanded .detail{display:block}
+.dt-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}
+.dt-label{color:var(--text4);font-size:11px;min-width:80px}
+.dt-value{color:var(--text);font-weight:500;text-align:right;word-break:break-all}
+.dt-email{color:var(--accent2);text-decoration:none;font-weight:500;font-size:12px}
+.dt-email:hover{text-decoration:underline}
+.dt-linkedin{display:inline-flex;align-items:center;gap:4px;color:#0A66C2;text-decoration:none;font-size:11px;font-weight:600;margin-top:8px;padding:4px 10px;border:1px solid #0A66C2;border-radius:6px}
+.dt-linkedin:hover{background:#0A66C2;color:#fff}
+.dt-followup{background:var(--followup-bg);border-radius:6px;padding:10px 12px;margin-top:10px}
+.dt-followup-title{font-size:10px;font-weight:600;color:var(--followup);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.dt-followup-item{font-size:11px;color:var(--text2);padding:2px 0 2px 12px;position:relative}
+.dt-followup-item::before{content:'';position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;background:var(--followup)}
+.footer{padding:20px 40px;background:var(--bg2);border-top:1px solid var(--border);font-size:11px;color:var(--text5);text-align:center}
+.no-results{padding:40px;text-align:center;font-size:14px;color:var(--text3);grid-column:1/-1}
+.hidden-card{display:none}
+@media(max-width:768px){.grid{grid-template-columns:1fr;padding:0 16px}.header,.toolbar,.progress-bar,.this-week,.stats,.legend,.section,.footer{padding-left:16px;padding-right:16px}.stats{flex-wrap:wrap;gap:8px}.stat{min-width:60px;padding:8px 10px}.toolbar{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<div class="pw-screen" id="pwScreen">
+<div class="pw-box">
+<h2>MCW Dance Card</h2>
+<p>Enter password to access priority contacts</p>
+<input type="password" id="pwInput" placeholder="Password" autocomplete="off">
+<button onclick="checkPw()">Access</button>
+<div class="pw-err" id="pwErr"></div>
+</div>
+</div>
+
+<div class="app hidden" id="app">
+
+<div class="header">
+<h1>MCW Dance Card</h1>
+<p>Priority Contacts &mdash; 6-Month Engagement Plan (May&ndash;October 2026)</p>
+</div>
+
+<div class="toolbar">
+<div class="search-box">
+<span class="search-icon">&#x1F50D;</span>
+<input type="text" id="search" placeholder="Search by name, firm, or title..." oninput="applyFilters()">
+</div>
+<div class="filter-btns">
+<button class="fbtn active" data-f="all" onclick="setFilter(this)">All (33)</button>
+<button class="fbtn" data-f="owner" onclick="setFilter(this)">Owners</button>
+<button class="fbtn" data-f="architect" onclick="setFilter(this)">Architects</button>
+<button class="fbtn" data-f="contractor" onclick="setFilter(this)">Contractors</button>
+<button class="fbtn" data-f="met" onclick="setFilter(this)">Met</button>
+<button class="fbtn" data-f="notmet" onclick="setFilter(this)">Not yet met</button>
+</div>
+</div>
+
+<div class="progress-bar">
+<span class="progress-text" id="progressText">1 of 33 met</span>
+<div class="progress-track"><div class="progress-fill" id="progressFill" style="width:3%"></div></div>
+<span class="progress-text" id="progressPct">3%</span>
+</div>
+
+<div class="this-week" id="thisWeek">
+<div class="this-week-title">This week's planned meetings (Wk 1 &mdash; May 1)</div>
+<div class="this-week-items">
+<div class="tw-item"><div class="tw-dot" style="background:var(--owner)"></div>Belinda Graham &mdash; VCH</div>
+<div class="tw-item"><div class="tw-dot" style="background:var(--arch)"></div>Wojciech Brus &mdash; Kasian</div>
+<div class="tw-item"><div class="tw-dot" style="background:var(--arch)"></div>Kim Johnston &mdash; JDA</div>
+</div>
+</div>
+
+<div class="stats">
+<div class="stat"><div class="stat-num">33</div><div class="stat-label">Priority contacts</div></div>
+<div class="stat"><div class="stat-num">52</div><div class="stat-label">Coffee / lunch</div></div>
+<div class="stat"><div class="stat-num">26</div><div class="stat-label">Happy hours</div></div>
+<div class="stat"><div class="stat-num">12</div><div class="stat-label">Lunch &amp; learns</div></div>
+<div class="stat"><div class="stat-num">~90</div><div class="stat-label">Total touchpoints</div></div>
+</div>
+
+<div class="legend">
+<div class="legend-item"><div class="legend-dot" style="background:var(--owner)"></div>Owner</div>
+<div class="legend-item"><div class="legend-dot" style="background:var(--arch)"></div>Architect</div>
+<div class="legend-item"><div class="legend-dot" style="background:var(--con)"></div>Contractor</div>
+<div class="legend-item"><div class="legend-dot" style="background:var(--met)"></div>Met</div>
+</div>
+
+<div class="section" data-sec="owner">Owners &mdash; Health authorities, education, government, developers</div>
+<div class="grid" id="gridOwners">
+
+<div class="card" data-cat="owner" data-met="0" data-search="belinda graham vancouver coastal health exec dir planning projects facilities" onclick="toggle(this)"><span class="rank">#1</span><div class="card-top"><div class="avatar av-owner">BG</div><div class="card-info"><div class="card-name">Belinda Graham</div><div class="card-firm">Vancouver Coastal Health</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Exec Dir, Planning &amp; Projects, Facilities</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Vancouver Coastal Health</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:belinda.graham@vch.ca" onclick="event.stopPropagation()">belinda.graham@vch.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 1 (May 1)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 19 (Sep 4)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Belinda%20Graham%20Vancouver%20Coastal%20Health" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="tawsif mohammad vancouver coastal health project leader" onclick="toggle(this)"><span class="rank">#2</span><div class="card-top"><div class="avatar av-owner">TM</div><div class="card-info"><div class="card-name">Tawsif Mohammad</div><div class="card-firm">Vancouver Coastal Health</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Project Leader, Planning &amp; Projects</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Vancouver Coastal Health</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:tawsif.mohammad@vch.ca" onclick="event.stopPropagation()">tawsif.mohammad@vch.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 15 (Aug 7)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Tawsif%20Mohammad%20Vancouver%20Coastal%20Health" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="lorne mack vancouver coastal health executive director capital planning" onclick="toggle(this)"><span class="rank">#3</span><div class="card-top"><div class="avatar av-owner">LM</div><div class="card-info"><div class="card-name">Lorne Mack</div><div class="card-firm">Vancouver Coastal Health</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Executive Director, Capital Planning &amp; Projects</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Vancouver Coastal Health</span></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 4 (May 22)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Lorne%20Mack%20Vancouver%20Coastal%20Health" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="jeremy lockwood-menard fraser health authority project leader" onclick="toggle(this)"><span class="rank">#4</span><div class="card-top"><div class="avatar av-owner">JL</div><div class="card-info"><div class="card-name">Jeremy Lockwood-Menard</div><div class="card-firm">Fraser Health Authority</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Project Leader</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Fraser Health Authority</span></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 3 (May 15)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 18 (Aug 28)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Jeremy%20Lockwood-Menard%20Fraser%20Health" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="juan martinez phsa sr director major capital projects" onclick="toggle(this)"><span class="rank">#5</span><div class="card-top"><div class="avatar av-owner">JM</div><div class="card-info"><div class="card-name">Juan Martinez</div><div class="card-firm">PHSA</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Sr Director, Major Capital Projects</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Provincial Health Services Authority</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:juan.martinez@phsa.ca" onclick="event.stopPropagation()">juan.martinez@phsa.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 2 (May 8)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 16 (Aug 14)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Juan%20Martinez%20PHSA" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="robin latondresse phsa sr exec dir major capital" onclick="toggle(this)"><span class="rank">#6</span><div class="card-top"><div class="avatar av-owner">RL</div><div class="card-info"><div class="card-name">Robin Latondresse</div><div class="card-firm">PHSA</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Sr Exec Dir, Major Capital Projects</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Provincial Health Services Authority</span></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 5 (May 29)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 17 (Aug 21)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Robin%20Latondresse%20PHSA" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="jessie gresley-jones vancouver school board sd39 executive director facilities" onclick="toggle(this)"><span class="rank">#7</span><div class="card-top"><div class="avatar av-owner">JG</div><div class="card-info"><div class="card-name">Jessie Gresley-Jones</div><div class="card-firm">Vancouver School Board</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Executive Director, Facilities</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Vancouver School Board (SD39)</span></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 6 (Jun 5)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 20 (Sep 11)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Jessie%20Gresley-Jones%20Vancouver%20School%20Board" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="jennifer sanguinetti simon fraser university sfu avp facilities campus planning" onclick="toggle(this)"><span class="rank">#8</span><div class="card-top"><div class="avatar av-owner">JS</div><div class="card-info"><div class="card-name">Jennifer Sanguinetti</div><div class="card-firm">Simon Fraser University</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">AVP, Facilities &amp; Campus Planning</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Simon Fraser University</span></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 7 (Jun 12)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 21 (Sep 18)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Jennifer%20Sanguinetti%20SFU" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="danica djurkovic bcit vp campus planning facilities" onclick="toggle(this)"><span class="rank">#9</span><div class="card-top"><div class="avatar av-owner">DD</div><div class="card-info"><div class="card-name">Danica Djurkovic</div><div class="card-firm">BCIT</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">VP, Campus Planning &amp; Facilities</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">British Columbia Institute of Technology</span></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 9 (Jun 26)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 22 (Sep 25)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Danica%20Djurkovic%20BCIT" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="doris gao bc housing project technologist" onclick="toggle(this)"><span class="rank">#10</span><div class="card-top"><div class="avatar av-owner">DG</div><div class="card-info"><div class="card-name">Doris Gao</div><div class="card-firm">BC Housing</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Project Technologist</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">BC Housing</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:dogao@bchousing.org" onclick="event.stopPropagation()">dogao@bchousing.org</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 10 (Jul 3)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 23 (Oct 2)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Doris%20Gao%20BC%20Housing" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="kirsten ziebarth bc housing manager capital improvements" onclick="toggle(this)"><span class="rank">#11</span><div class="card-top"><div class="avatar av-owner">KZ</div><div class="card-info"><div class="card-name">Kirsten Ziebarth</div><div class="card-firm">BC Housing</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Manager, Capital Improvements</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">BC Housing</span></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 11 (Jul 10)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Kirsten%20Ziebarth%20BC%20Housing" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="jose teres city of burnaby professional engineer civic projects" onclick="toggle(this)"><span class="rank">#12</span><div class="card-top"><div class="avatar av-owner">JT</div><div class="card-info"><div class="card-name">Jose Teres</div><div class="card-firm">City of Burnaby</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Professional Engineer, Civic Projects ($248M hub)</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">City of Burnaby</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:Jose.Teres@burnaby.ca" onclick="event.stopPropagation()">Jose.Teres@burnaby.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 12 (Jul 17)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 24 (Oct 9)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Jose%20Teres%20City%20of%20Burnaby" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="gorman lee province of bc rpmb development manager" onclick="toggle(this)"><span class="rank">#13</span><div class="card-top"><div class="avatar av-owner">GL</div><div class="card-info"><div class="card-name">Gorman Lee</div><div class="card-firm">Province of BC (RPMB)</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Development Manager</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Province of BC (Real Property &amp; Major Buildings)</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:gorman.lee@gov.bc.ca" onclick="event.stopPropagation()">gorman.lee@gov.bc.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 13 (Jul 24)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 26 (Oct 23)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Gorman%20Lee%20BC%20Public%20Service" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="caelieh bell defence construction canada dcc regional service line leader pacific" onclick="toggle(this)"><span class="rank">#14</span><div class="card-top"><div class="avatar av-owner">CB</div><div class="card-info"><div class="card-name">Caelieh Bell</div><div class="card-firm">Defence Construction Canada</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Regional Service Line Leader, Pacific</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Defence Construction Canada</span></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 8 (Jun 19)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 25 (Oct 16)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Caelieh%20Bell%20Defence%20Construction%20Canada" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="owner" data-met="0" data-search="ryan beedie beedie group president" onclick="toggle(this)"><span class="rank">#15</span><div class="card-top"><div class="avatar av-owner">RB</div><div class="card-info"><div class="card-name">Ryan Beedie</div><div class="card-firm">Beedie Group</div></div></div><span class="card-badge b-owner">Owner</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">President</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Beedie Group</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:ryan@beedie.ca" onclick="event.stopPropagation()">ryan@beedie.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 14 (Jul 31)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Ryan%20Beedie" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+</div>
+
+<div class="section" data-sec="architect">Architects &mdash; Teaming partners for project pursuits</div>
+<div class="grid" id="gridArchitects">
+
+<div class="card" data-cat="architect" data-met="0" data-search="wojciech brus kasian architecture senior principal evp" onclick="toggle(this)"><span class="rank">#16</span><div class="card-top"><div class="avatar av-arch">WB</div><div class="card-info"><div class="card-name">Wojciech Brus</div><div class="card-firm">Kasian Architecture</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Senior Principal / EVP</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Kasian Architecture</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:wojciech.brus@Kasian.com" onclick="event.stopPropagation()">wojciech.brus@Kasian.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 1 (May 1)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 18 (Aug 28)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Wojciech%20Brus%20Kasian" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="abhishek gupta kasian architecture principal" onclick="toggle(this)"><span class="rank">#17</span><div class="card-top"><div class="avatar av-arch">AG</div><div class="card-info"><div class="card-name">Abhishek Gupta</div><div class="card-firm">Kasian Architecture</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Principal</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Kasian Architecture</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:Abhishek.Gupta@Kasian.com" onclick="event.stopPropagation()">Abhishek.Gupta@Kasian.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 2 (May 8)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 18 (Aug 28)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Abhishek%20Gupta%20Kasian" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="kim johnston jda johnston davidson architecture principal" onclick="toggle(this)"><span class="rank">#18</span><div class="card-top"><div class="avatar av-arch">KJ</div><div class="card-info"><div class="card-name">Kim Johnston</div><div class="card-firm">JDA (Johnston Davidson)</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Principal</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Johnston Davidson Architecture</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:kim@jdarch.ca" onclick="event.stopPropagation()">kim@jdarch.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 1 (May 1)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 12, 19</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Kim%20Johnston%20JDa%20Architecture" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card met" data-cat="architect" data-met="1" data-search="james madley kra architecture associate principal military healthcare ai" onclick="toggle(this)"><span class="rank">#19</span><div class="card-top"><div class="avatar av-arch">JM</div><div class="card-info"><div class="card-name">James Madley<span class="met-badge">Met</span></div><div class="card-firm">KRA Architecture</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Associate Principal</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">KRA Architecture</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:james@krarchitecture.ca" onclick="event.stopPropagation()">james@krarchitecture.ca</a></div><div class="dt-row"><span class="dt-label">Last meeting</span><span class="dt-value" style="color:var(--met);font-weight:600">Lunch &mdash; April 23, 2026</span></div><div class="dt-row"><span class="dt-label">Next follow-up</span><span class="dt-value">Wk 14, 24</span></div><div class="dt-followup"><div class="dt-followup-title">Follow-up actions</div><div class="dt-followup-item">Send AI meeting invitation</div><div class="dt-followup-item">Follow up on military healthcare work we are aware of</div></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=James%20Madley%20KRA%20Architecture" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="naomi gross chernoff thompson cta principal" onclick="toggle(this)"><span class="rank">#20</span><div class="card-top"><div class="avatar av-arch">NG</div><div class="card-info"><div class="card-name">Naomi Gross</div><div class="card-firm">Chernoff Thompson (CTA)</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Principal</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Chernoff Thompson Architects</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:naomi.g@cta.bc.ca" onclick="event.stopPropagation()">naomi.g@cta.bc.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 3 (May 15)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 12, 19</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Naomi%20Gross%20Chernoff%20Thompson" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="bassem tawfik kmbr architects planners principal" onclick="toggle(this)"><span class="rank">#21</span><div class="card-top"><div class="avatar av-arch">BT</div><div class="card-info"><div class="card-name">Bassem Tawfik</div><div class="card-firm">KMBR Architects Planners</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Principal</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">KMBR Architects Planners</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:btawfik@kmbr.com" onclick="event.stopPropagation()">btawfik@kmbr.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 3 (May 15)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 14, 26</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Bassem%20Tawfik%20KMBR" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="doug mclachlan ibi arcadis associate director practice lead" onclick="toggle(this)"><span class="rank">#22</span><div class="card-top"><div class="avatar av-arch">DM</div><div class="card-info"><div class="card-name">Doug McLachlan</div><div class="card-firm">IBI / Arcadis</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Associate Director, Practice Lead</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">IBI / Arcadis</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:DMcLachlan@arcadis.com" onclick="event.stopPropagation()">DMcLachlan@arcadis.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 5 (May 29)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 15, 22</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Doug%20McLachlan%20Arcadis" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="stuart rothnie hcma architecture design principal owner" onclick="toggle(this)"><span class="rank">#23</span><div class="card-top"><div class="avatar av-arch">SR</div><div class="card-info"><div class="card-name">Stuart Rothnie</div><div class="card-firm">HCMA Architecture + Design</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Principal Owner</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">HCMA Architecture + Design</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:s.rothnie@hcma.ca" onclick="event.stopPropagation()">s.rothnie@hcma.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 5 (May 29)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 15, 22</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Stuart%20Rothnie%20HCMA" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="john etcher hdr cei architecture sr clinical healthcare planner vp" onclick="toggle(this)"><span class="rank">#24</span><div class="card-top"><div class="avatar av-arch">JE</div><div class="card-info"><div class="card-name">John Etcher</div><div class="card-firm">HDR | CEI Architecture</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Sr Clinical Healthcare Planner / VP</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">HDR | CEI Architecture</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:john.etcher@hdrcei.com" onclick="event.stopPropagation()">john.etcher@hdrcei.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 6 (Jun 5)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 16, 24</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=John%20Etcher%20HDR" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="nicolas dubois-robitaille perkins will managing director vancouver" onclick="toggle(this)"><span class="rank">#25</span><div class="card-top"><div class="avatar av-arch">ND</div><div class="card-info"><div class="card-name">Nicolas Dubois-Robitaille</div><div class="card-firm">Perkins &amp; Will</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Managing Director, Vancouver</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Perkins &amp; Will</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:Nicolas.Robitaille@perkinswill.com" onclick="event.stopPropagation()">Nicolas.Robitaille@perkinswill.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 6 (Jun 5)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 11, 23</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Nicolas%20Dubois-Robitaille%20Perkins%20Will" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="ana maria llanos diamond schmitt architects principal vancouver studio lead" onclick="toggle(this)"><span class="rank">#26</span><div class="card-top"><div class="avatar av-arch">AL</div><div class="card-info"><div class="card-name">Ana Maria Llanos</div><div class="card-firm">Diamond Schmitt Architects</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Principal, Vancouver Studio Lead</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Diamond Schmitt Architects</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:allanos@dsai.ca" onclick="event.stopPropagation()">allanos@dsai.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 7 (Jun 12)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 10, 20</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Ana%20Maria%20Llanos%20Diamond%20Schmitt" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="architect" data-met="0" data-search="cecilia einarson stantec architecture airport terminals sector lead" onclick="toggle(this)"><span class="rank">#27</span><div class="card-top"><div class="avatar av-arch">CE</div><div class="card-info"><div class="card-name">Cecilia Einarson</div><div class="card-firm">Stantec Architecture</div></div></div><span class="card-badge b-arch">Architect</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Airport Terminals Sector Lead</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Stantec Architecture</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:cecilia.einarson@stantec.com" onclick="event.stopPropagation()">cecilia.einarson@stantec.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 9 (Jun 26)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 10, 20</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Cecilia%20Einarson%20Stantec" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+</div>
+
+<div class="section" data-sec="contractor">Contractors &mdash; Design-build, CM &amp; trade partners</div>
+<div class="grid" id="gridContractors">
+
+<div class="card" data-cat="contractor" data-met="0" data-search="eric gerlach ledcor construction svp development properties" onclick="toggle(this)"><span class="rank">#28</span><div class="card-top"><div class="avatar av-con">EG</div><div class="card-info"><div class="card-name">Eric Gerlach</div><div class="card-firm">Ledcor Construction</div></div></div><span class="card-badge b-con">Contractor</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">SVP, Development / Properties</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Ledcor Construction</span></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 4 (May 22)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 17 (Aug 21)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Eric%20Gerlach%20Ledcor" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="contractor" data-met="0" data-search="steve venables pcl construction senior manager" onclick="toggle(this)"><span class="rank">#29</span><div class="card-top"><div class="avatar av-con">SV</div><div class="card-info"><div class="card-name">Steve Venables</div><div class="card-firm">PCL Construction</div></div></div><span class="card-badge b-con">Contractor</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Senior Manager</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">PCL Construction</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:svenables@pcl.com" onclick="event.stopPropagation()">svenables@pcl.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 4 (May 22)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 17 (Aug 21)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Steve%20Venables%20PCL" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="contractor" data-met="0" data-search="frances cartmel graham construction manager proposal marketing" onclick="toggle(this)"><span class="rank">#30</span><div class="card-top"><div class="avatar av-con">FC</div><div class="card-info"><div class="card-name">Frances Cartmel</div><div class="card-firm">Graham Construction</div></div></div><span class="card-badge b-con">Contractor</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Manager, Proposal &amp; Marketing</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Graham Construction</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:frances.cartmel@graham.ca" onclick="event.stopPropagation()">frances.cartmel@graham.ca</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 8 (Jun 19)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 21 (Sep 18)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Frances%20Cartmel%20Graham%20Construction" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="contractor" data-met="0" data-search="bruce vasarhely kinetic construction branch manager vancouver" onclick="toggle(this)"><span class="rank">#31</span><div class="card-top"><div class="avatar av-con">BV</div><div class="card-info"><div class="card-name">Bruce Vasarhely</div><div class="card-firm">Kinetic Construction</div></div></div><span class="card-badge b-con">Contractor</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Branch Manager, Vancouver</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Kinetic Construction</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:bvasarhely@kineticconstruction.com" onclick="event.stopPropagation()">bvasarhely@kineticconstruction.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 8 (Jun 19)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 21 (Sep 18)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Bruce%20Vasarhely%20Kinetic%20Construction" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="contractor" data-met="0" data-search="don colling canem systems branch manager" onclick="toggle(this)"><span class="rank">#32</span><div class="card-top"><div class="avatar av-con">DC</div><div class="card-info"><div class="card-name">Don Colling</div><div class="card-firm">Canem Systems</div></div></div><span class="card-badge b-con">Contractor</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">Branch Manager</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Canem Systems</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:dcolling@canem.com" onclick="event.stopPropagation()">dcolling@canem.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 13 (Jul 24)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 25 (Oct 16)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Don%20Colling%20Canem" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+<div class="card" data-cat="contractor" data-met="0" data-search="darin hughes scott construction president" onclick="toggle(this)"><span class="rank">#33</span><div class="card-top"><div class="avatar av-con">DH</div><div class="card-info"><div class="card-name">Darin Hughes</div><div class="card-firm">Scott Construction</div></div></div><span class="card-badge b-con">Contractor</span><div class="detail"><div class="dt-row"><span class="dt-label">Title</span><span class="dt-value">President</span></div><div class="dt-row"><span class="dt-label">Organization</span><span class="dt-value">Scott Construction</span></div><div class="dt-row"><span class="dt-label">Email</span><a class="dt-email" href="mailto:darinh@scottconstructiongroup.com" onclick="event.stopPropagation()">darinh@scottconstructiongroup.com</a></div><div class="dt-row"><span class="dt-label">First meeting</span><span class="dt-value">Wk 13 (Jul 24)</span></div><div class="dt-row"><span class="dt-label">Follow-up</span><span class="dt-value">Wk 25 (Oct 16)</span></div><a class="dt-linkedin" href="https://www.linkedin.com/search/results/all/?keywords=Darin%20Hughes%20Scott%20Construction" target="_blank" rel="noopener" onclick="event.stopPropagation()">View on LinkedIn</a></div></div>
+
+</div>
+
+<div class="footer">
+MCW Consultants Ltd. &mdash; Vancouver Office &mdash; 6-Month Client Engagement Plan &mdash; Last updated: April 23, 2026
+</div>
+
+</div>
+
+<script>
+var PW_HASH='mcw2026';
+function checkPw(){var v=document.getElementById('pwInput').value;if(v===PW_HASH){document.getElementById('pwScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');sessionStorage.setItem('mcw_auth','1')}else{document.getElementById('pwErr').textContent='Incorrect password'}}
+document.getElementById('pwInput').addEventListener('keydown',function(e){if(e.key==='Enter')checkPw()});
+if(sessionStorage.getItem('mcw_auth')==='1'){document.getElementById('pwScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden')}
+
+function toggle(el){var wasOpen=el.classList.contains('expanded');document.querySelectorAll('.card.expanded').forEach(function(c){c.classList.remove('expanded')});if(!wasOpen)el.classList.add('expanded')}
+
+var activeFilter='all';
+function setFilter(btn){document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');activeFilter=btn.dataset.f;applyFilters()}
+
+function applyFilters(){
+var q=document.getElementById('search').value.toLowerCase();
+var cards=document.querySelectorAll('.card');
+var sections=document.querySelectorAll('.section[data-sec]');
+var shown={owner:0,architect:0,contractor:0};
+cards.forEach(function(c){
+var cat=c.dataset.cat;
+var met=c.dataset.met==='1';
+var search=c.dataset.search;
+var matchFilter=activeFilter==='all'||(activeFilter==='met'&&met)||(activeFilter==='notmet'&&!met)||activeFilter===cat;
+var matchSearch=!q||search.indexOf(q)!==-1;
+if(matchFilter&&matchSearch){c.classList.remove('hidden-card');shown[cat]++}else{c.classList.add('hidden-card');c.classList.remove('expanded')}
+});
+sections.forEach(function(s){var sec=s.dataset.sec;var grid=s.nextElementSibling;if(shown[sec]===0){s.style.display='none';grid.style.display='none'}else{s.style.display='';grid.style.display=''}});
+}
+</script>
+
+</body>
+</html>
