@@ -307,7 +307,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 
 <div class="tab-panel" id="panelActual">
 <div class="cal-controls">
-<div class="cal-title" id="actualTitle">May 2026</div>
+<div class="cal-title" id="actualTitle">April 2026</div>
 <div class="cal-nav">
 <button onclick="navCal('actual',-1)">&larr; Prev</button>
 <button onclick="navCal('actual',0)">Today</button>
@@ -379,7 +379,7 @@ var actualEvents=[
 {d:'2026-04-23',t:'arch',n:'James Madley',f:'KRA Architecture',type:'Lunch',notes:'Follow up: AI meeting invitation + military healthcare work'}
 ];
 
-var calMonths={planned:4,actual:4};
+var calMonths={planned:4,actual:3};
 var calYears={planned:2026,actual:2026};
 var monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
 var dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -415,7 +415,9 @@ else if(ev.t==='ll')ecls+='ce-ll';
 else if(ev.t==='event')ecls+='ce-event';
 if(cal==='actual')ecls+=' ce-met';
 var label=ev.n+(ev.f?' - '+ev.f:'');
-html+='<div class="'+ecls+'" title="'+label+'">'+ev.n+'</div>';
+if(cal==='actual'&&ev.type)label+='\n'+ev.type;
+if(ev.notes)label+='\n'+ev.notes;
+html+='<div class="'+ecls+'" title="'+label.replace(/"/g,'&quot;')+'">'+ev.n+'</div>';
 }});
 }
 html+='</div>';day++}
